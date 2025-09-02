@@ -1,0 +1,353 @@
+<!-- sentiment_analysis_dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis - {{ form.title }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sentiment-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .sentiment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .sentiment-bar {
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #e9ecef;
+        }
+        
+        .sentiment-segment {
+            height: 100%;
+            float: left;
+        }
+        
+        .positive { background: linear-gradient(90deg, #28a745, #20c997); }
+        .neutral { background: linear-gradient(90deg, #6c757d, #adb5bd); }
+        .negative { background: linear-gradient(90deg, #dc3545, #fd7e14); }
+        
+        .stats-badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .response-item {
+            border-left: 4px solid #dee2e6;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        
+        .response-item.positive { border-left-color: #28a745; }
+        .response-item.neutral { border-left-color: #6c757d; }
+        .response-item.negative { border-left-color: #dc3545; }
+        
+        .confidence-score {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-1">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            Sentiment Analysis Dashboard
+                        </h1>
+                        <p class="text-muted mb-0">{{ form.title }}</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary btn-sm" onclick="refreshAnalysis()">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            Refresh Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if not question_data %}
+            <!-- No Data State -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card sentiment-card text-center py-5">
+                        <div class="card-body">
+                            <i class="fas fa-comments text-muted mb-3" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted">No Long Text Questions Found</h5>
+                            <p class="text-muted">This form doesn't have any long text questions to analyze.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Questions Grid -->
+            <div class="row">
+                {% for data in question_data %}
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card sentiment-card h-100">
+                        <div class="card-body">
+                            <!-- Question Text -->
+                            <div class="question-text">
+                                {{ data.question.question }}
+                            </div>
+                            
+                            {% if data.total_responses > 0 %}
+                                <!-- Sentiment Distribution Bar -->
+                                <div class="sentiment-bar mb-3">
+                                    {% if data.positive_percentage > 0 %}
+                                        <div class="sentiment-segment positive" style="width: {{ data.positive_percentage }}%;"></div>
+                                    {% endif %}
+                                    {% if data.neutral_percentage > 0 %}
+                                        <div class="sentiment-segment neutral" style="width: {{ data.neutral_percentage }}%;"></div>
+                                    {% endif %}
+                                    {% if data.negative_percentage > 0 %}
+                                        <div class="sentiment-segment negative" style="width: {{ data.negative_percentage }}%;"></div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Statistics -->
+                                <div class="row text-center mb-3">
+                                    <div class="col-4">
+                                        <span class="badge stats-badge text-white" style="background-color: #28a745;">
+                                            <i class="fas fa-smile me-1"></i>
+                                            {{ data.positive_count }}
+                                        </span>
+                                        <div class="small text-muted">Positive</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <span class="badge stats-badge text-white" style="background-color: #6c757d;">
+                                            <i class="fas fa-meh me-1"></i>
+                                            {{ data.neutral_count }}
+                                        </span>
+                                        <div class="small text-muted">Neutral</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <span class="badge stats-badge text-white" style="background-color: #dc3545;">
+                                            <i class="fas fa-frown me-1"></i>
+                                            {{ data.negative_count }}
+                                        </span>
+                                        <div class="small text-muted">Negative</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Total Responses -->
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-users me-1"></i>
+                                        {{ data.total_responses }} response{{ data.total_responses|pluralize }}
+                                    </small>
+                                    <button class="btn btn-primary btn-sm" 
+                                            onclick="viewDetails({{ data.question.id }}, '{{ data.question.question|escapejs }}')">
+                                        <i class="fas fa-eye me-1"></i>
+                                        View Details
+                                    </button>
+                                </div>
+                            {% else %}
+                                <!-- No Responses -->
+                                <div class="text-center py-4">
+                                    <i class="fas fa-inbox text-muted mb-2" style="font-size: 2rem;"></i>
+                                    <div class="text-muted">No responses yet</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Response Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalContent">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function viewDetails(questionId, questionText) {
+            const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+            const modalContent = document.getElementById('modalContent');
+            
+            // Show loading
+            modalContent.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-2">Loading response details...</div>
+                </div>
+            `;
+            
+            modal.show();
+            
+            // Fetch details
+            fetch(`/sentiment/question/${questionId}/details/`)
+                .then(response => response.json())
+                .then(data => {
+                    let content = `
+                        <div class="mb-3">
+                            <h6 class="text-primary">Question:</h6>
+                            <p class="question-text">${data.question}</p>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Total Responses: ${data.total_count}</small>
+                        </div>
+                        <hr>
+                    `;
+                    
+                    if (data.details.length > 0) {
+                        data.details.forEach(detail => {
+                            const sentimentIcon = detail.sentiment === 'positive' ? 'fas fa-smile text-success' :
+                                                detail.sentiment === 'negative' ? 'fas fa-frown text-danger' :
+                                                'fas fa-meh text-secondary';
+                            
+                            content += `
+                                <div class="response-item ${detail.sentiment}">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="${sentimentIcon} me-2"></i>
+                                            <span class="badge bg-${detail.sentiment === 'positive' ? 'success' : 
+                                                                    detail.sentiment === 'negative' ? 'danger' : 'secondary'}">
+                                                ${detail.sentiment.toUpperCase()}
+                                            </span>
+                                            <span class="confidence-score ms-2 text-muted">
+                                                (${(detail.confidence * 100).toFixed(1)}% confidence)
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">${detail.submitted_at}</small>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Response:</strong>
+                                        <div class="mt-1 p-2 bg-white rounded border">
+                                            ${detail.response_text}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-envelope me-1"></i>
+                                            ${detail.responder_email}
+                                        </small>
+                                        <small class="text-muted">
+                                            Analyzed: ${detail.processed_at}
+                                        </small>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        content += `
+                            <div class="text-center py-4">
+                                <i class="fas fa-inbox text-muted mb-2" style="font-size: 2rem;"></i>
+                                <div class="text-muted">No responses found for this question.</div>
+                            </div>
+                        `;
+                    }
+                    
+                    modalContent.innerHTML = content;
+                })
+                .catch(error => {
+                    modalContent.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Error loading details: ${error.message}
+                        </div>
+                    `;
+                });
+        }
+        
+        function refreshAnalysis() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
+            button.disabled = true;
+            
+            fetch(`/sentiment/retrain/{{ form.id }}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload(); // Reload page to show updated results
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error refreshing analysis: ' + error.message);
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!-- templates/correlation/analysis.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correlation Analysis - {{ form.title }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .correlation-card {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .correlation-header {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        .correlation-body {
+            padding: 1.5rem;
+        }
+        .correlation-score {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .correlation-strong { color: #28a745; }
+        .correlation-moderate { color: #ffc107; }
+        .correlation-weak { color: #dc3545; }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1rem 0;
+        }
+        
+        .generate-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+        
+        .modal-lg {
+            max-width: 900px;
+        }
+        
+        .question-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+        }
+
+        .question-type-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+        
+        .badge-multiple-choice {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .badge-linear-scale {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .choice-option {
+            margin-left: 1rem;
+            padding: 0.75rem;
+            border-left: 3px solid #e9ecef;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .choice-option:hover {
+            background: #e9ecef;
+            cursor: pointer;
+        }
+
+        .choice-option input[type="radio"] {
+            margin-right: 0.75rem;
+        }
+
+        .choice-label {
+            font-weight: 500;
+            color: #212529;
+            margin-right: 0.5rem;
+        }
+
+        .choice-count {
+            background: #6c757d;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .respondent-count {
+            background: #007bff;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .question-group {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            background: white;
+        }
+
+        .question-header {
+            background: #f1f3f4;
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+        }
+
+        .choices-container {
+            padding: 0.5rem;
+        }
+
+        .variable-section {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .variable-section h6 {
+            margin-bottom: 0.75rem;
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.5rem;
+        }
+
+        .choice-option.selected {
+            background: #e3f2fd !important;
+            border-left: 3px solid #2196f3 !important;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Generate Correlation Button -->
+        <button class="btn btn-primary generate-btn" data-bs-toggle="modal" data-bs-target="#correlationModal">
+            <i class="fas fa-plus"></i> Generate Correlation
+        </button>
+        
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-6">Correlation Analysis</h1>
+                <p class="text-muted">{{ form.title }}</p>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Correlations Display -->
+        <div class="row">
+            <div class="col-12">
+                {% if correlation_data %}
+                    {% for item in correlation_data %}
+                        <div class="correlation-card">
+                            <div class="correlation-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ item.correlation.name|slice:":-15" }}</h5>
+                                    <small class="text-muted">
+                                        Created: {{ item.correlation.created_at|date:"M d, Y H:i" }}
+                                    </small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-info" onclick="updateCorrelation({{ item.correlation.id }})">
+                                        <i class="fas fa-sync"></i> Update
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteCorrelation({{ item.correlation.id }}, '{{ item.correlation.name }}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="correlation-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="chart-container">
+                                            <canvas id="chart-{{ item.correlation.id }}"></canvas>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p><strong>X Variable:</strong> {{ item.data.x_label }} <span class="respondent-count">{{ item.data.x_respondents }} respondents</span></p>
+                                            <p><strong>Y Variable:</strong> {{ item.data.y_label }} <span class="respondent-count">{{ item.data.y_respondents }} respondents</span></p>
+                                            <p><strong>Data Points:</strong> {{ item.data.data_points }}</p>
+                                            {% if item.data.linear_scale_questions_count %}
+                                                <p><strong>Linear Scale Questions Used:</strong> {{ item.data.linear_scale_questions_count }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <div class="mb-3">
+                                            <h6>Pearson Correlation</h6>
+                                            <div class="correlation-score {% if item.data.correlation_coefficient >= 0.7 %}correlation-strong{% elif item.data.correlation_coefficient >= 0.3 %}correlation-moderate{% else %}correlation-weak{% endif %}">
+                                                {{ item.data.correlation_coefficient|floatformat:3 }}
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            {% if item.data.correlation_coefficient >= 0.7 %}
+                                                <span class="badge bg-success">Strong Correlation</span>
+                                            {% elif item.data.correlation_coefficient >= 0.3 %}
+                                                <span class="badge bg-warning">Moderate Correlation</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Weak Correlation</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="correlation-questions">
+                                            <h6>Linear Scale Questions Used:</h6>
+                                            <ul class="list-unstyled small">
+                                                {% for question in item.correlation.correlation_questions.all %}
+                                                    {% if question.question_type == 'linear_scale' %}
+                                                        <li>• {{ question.question|truncatechars:50 }}</li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <script>
+                            // Create scatter plot for correlation {{ item.correlation.id }}
+                            const ctx{{ item.correlation.id }} = document.getElementById('chart-{{ item.correlation.id }}').getContext('2d');
+                            new Chart(ctx{{ item.correlation.id }}, {
+                                type: 'scatter',
+                                data: {
+                                    datasets: [{
+                                        label: 'Data Points',
+                                        data: {{ item.data.scatter_data|safe }},
+                                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                        borderColor: 'rgba(54, 162, 235, 1)',
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        x: {
+                                            type: 'linear',
+                                            position: 'bottom',
+                                            title: {
+                                                display: true,
+                                                text: '{{ item.data.x_label|truncatechars:30 }}'
+                                            },
+                                            min: 1,
+                                            max: 5
+                                        },
+                                        y: {
+                                            title: {
+                                                display: true,
+                                                text: 'Average Linear Scale Score'
+                                            },
+                                            min: 1,
+                                            max: 5
+                                        }
+                                    },
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Correlation: {{ item.data.correlation_coefficient|floatformat:3 }}'
+                                        },
+                                        legend: {
+                                            display: false
+                                        }
+                                    }
+                                }
+                            });
+                        </script>
+                    {% endfor %}
+                    
+                    <!-- Pagination -->
+                    {% if correlations.has_other_pages %}
+                        <nav aria-label="Correlation pagination">
+                            <ul class="pagination justify-content-center">
+                                {% if correlations.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ correlations.previous_page_number }}">Previous</a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for num in correlations.paginator.page_range %}
+                                    {% if correlations.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if correlations.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ correlations.next_page_number }}">Next</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-chart-scatter fa-4x text-muted"></i>
+                        </div>
+                        <h4 class="text-muted">No Correlations Yet</h4>
+                        <p class="text-muted">Click "Generate Correlation" to create your first correlation analysis.</p>
+                        {% if not has_first_section_questions or not has_correlation_questions %}
+                            <div class="alert alert-warning mt-3" role="alert">
+                                <strong>Note:</strong> You need the right question types to perform correlation analysis.
+                                {% if not has_first_section_questions %}
+                                    <br>• No multiple choice questions found in the first section for X/Y variables.
+                                {% endif %}
+                                {% if not has_correlation_questions %}
+                                    <br>• No linear scale questions found for correlation data.
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Correlation Modal -->
+    <div class="modal fade" id="correlationModal" tabindex="-1" aria-labelledby="correlationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="correlationModalLabel">Generate Correlation Analysis</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% if not has_first_section_questions or not has_correlation_questions %}
+                            <div class="alert alert-warning" role="alert">
+                                <strong>Cannot create correlation:</strong>
+                                {% if not has_first_section_questions %}
+                                    <br>• No multiple choice questions found in the first section for X/Y variables.
+                                {% endif %}
+                                {% if not has_correlation_questions %}
+                                    <br>• No linear scale questions found for correlation data.
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="name" class="form-label">Correlation Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required 
+                                           placeholder="Enter a name for this correlation analysis">
+                                </div>
+                                
+                                <!-- X Variable Section -->
+                                <div class="col-md-6 mb-3">
+                                    <div class="variable-section">
+                                        <h6><i class="fas fa-chart-line text-primary"></i> X Variable *</h6>
+                                        {% for question in first_section_questions %}
+                                            <div class="question-group">
+                                                <div class="question-header">
+                                                    <span class="question-type-badge badge-multiple-choice me-2">MULTIPLE CHOICE</span>
+                                                    {{ question.question }}
+                                                </div>
+                                                <div class="choices-container">
+                                                    {% for choice in question.choices.all %}
+                                                        <div class="choice-option">
+                                                            <input type="radio" 
+                                                                   name="x_variable" 
+                                                                   value="{{ choice.id }}" 
+                                                                   id="x_choice_{{ choice.id }}"
+                                                                   required>
+                                                            <label for="x_choice_{{ choice.id }}">
+                                                                <span class="choice-label">{{ choice.choice }}:</span>
+                                                                <span class="choice-count">{{ choice.response_count|default:0 }}</span>
+                                                            </label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                        <div class="form-text">Select a specific choice as X variable</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Y Variable Section -->
+                                <div class="col-md-6 mb-3">
+                                    <div class="variable-section">
+                                        <h6><i class="fas fa-chart-line text-success"></i> Y Variable *</h6>
+                                        {% for question in first_section_questions %}
+                                            <div class="question-group">
+                                                <div class="question-header">
+                                                    <span class="question-type-badge badge-multiple-choice me-2">MULTIPLE CHOICE</span>
+                                                    {{ question.question }}
+                                                </div>
+                                                <div class="choices-container">
+                                                    {% for choice in question.choices.all %}
+                                                        <div class="choice-option">
+                                                            <input type="radio" 
+                                                                   name="y_variable" 
+                                                                   value="{{ choice.id }}" 
+                                                                   id="y_choice_{{ choice.id }}"
+                                                                   required>
+                                                            <label for="y_choice_{{ choice.id }}">
+                                                                <span class="choice-label">{{ choice.choice }}:</span>
+                                                                <span class="choice-count">{{ choice.response_count|default:0 }}</span>
+                                                            </label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                        <div class="form-text">Select a specific choice as Y variable (must be different from X)</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Correlation Questions (Linear Scale) *</label>
+                                    <div class="form-text mb-2">
+                                        Select linear scale questions for correlation analysis. 
+                                        The average score of selected questions will be used as the correlation data.
+                                    </div>
+                                    <div class="question-list">
+                                        {% regroup correlation_questions by section as section_list %}
+                                        {% for section in section_list %}
+                                            <div class="mb-3">
+                                                <h6 class="text-primary">{{ section.grouper.title }}</h6>
+                                                {% for question in section.list %}
+                                                    <div class="form-check">
+                                                        <input class="form-check-input correlation-question" 
+                                                               type="checkbox" 
+                                                               value="{{ question.id }}" 
+                                                               id="question_{{ question.id }}"
+                                                               name="correlation_questions">
+                                                        <label class="form-check-label" for="question_{{ question.id }}">
+                                                            <span class="question-type-badge badge-linear-scale me-2">LINEAR SCALE</span>
+                                                            {{ question.question }}
+                                                            <small class="text-muted d-block">
+                                                                Scale: {{ question.scale_min }} ({{ question.scale_min_label|default:"Min" }}) 
+                                                                to {{ question.scale_max }} ({{ question.scale_max_label|default:"Max" }})
+                                                            </small>
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div id="correlation-questions-error" class="text-danger small" style="display: none;">
+                                        Please select at least one linear scale question.
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <strong>How it works:</strong> 
+                                        <ul class="mb-0 mt-2">
+                                            <li><strong>X and Y variables:</strong> Specific choices from multiple choice questions in first section</li>
+                                            <li><strong>Correlation data:</strong> Average of selected linear scale questions for respondents who chose X or Y</li>
+                                            <li><strong>Analysis:</strong> Pearson correlation between choice selections and linear scale averages</li>
+                                            <li><strong>Result:</strong> Correlation coefficient showing relationship strength</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        {% if has_first_section_questions and has_correlation_questions %}
+                            <button type="submit" class="btn btn-primary" id="createCorrelationBtn">
+                                <i class="fas fa-chart-line"></i> Create Correlation
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the correlation "<span id="deleteCorrelationName"></span>"?</p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" id="deleteForm" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Form validation
+        document.getElementById('createCorrelationBtn').addEventListener('click', function(e) {
+            const correlationQuestions = document.querySelectorAll('.correlation-question:checked');
+            const errorDiv = document.getElementById('correlation-questions-error');
+            
+            if (correlationQuestions.length === 0) {
+                e.preventDefault();
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Please select at least one linear scale question.';
+                return false;
+            } else {
+                errorDiv.style.display = 'none';
+            }
+            
+            // Check if X and Y variables are different
+            const xVar = document.querySelector('input[name="x_variable"]:checked');
+            const yVar = document.querySelector('input[name="y_variable"]:checked');
+            
+            if (!xVar || !yVar) {
+                e.preventDefault();
+                alert('Please select both X and Y variables.');
+                return false;
+            }
+            
+            if (xVar.value === yVar.value) {
+                e.preventDefault();
+                alert('X and Y variables must be different choices.');
+                return false;
+            }
+        });
+        
+        // Delete correlation function
+        function deleteCorrelation(correlationId, correlationName) {
+            document.getElementById('deleteCorrelationName').textContent = correlationName;
+            document.getElementById('deleteForm').action = `delete/${correlationId}/`;
+            
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+        
+        // Update correlation function
+        function updateCorrelation(correlationId) {
+            if (confirm('Recalculate this correlation? This will update the correlation coefficient based on current responses.')) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = `update/${correlationId}/`;
+                
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+        
+        // Clear error when correlation questions are selected
+        document.querySelectorAll('.correlation-question').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                const checkedBoxes = document.querySelectorAll('.correlation-question:checked');
+                const errorDiv = document.getElementById('correlation-questions-error');
+                
+                if (checkedBoxes.length > 0) {
+                    errorDiv.style.display = 'none';
+                }
+            });
+        });
+        
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Enhanced visual feedback for choice selection
+        document.querySelectorAll('.choice-option input[type="radio"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                // Remove selected class from all choices in the same variable group
+                const variableName = this.name;
+                document.querySelectorAll(`input[name="${variableName}"]`).forEach(function(r) {
+                    r.closest('.choice-option').classList.remove('selected');
+                });
+                
+                // Add selected class to the chosen option
+                if (this.checked) {
+                    this.closest('.choice-option').classList.add('selected');
+                }
+            });
+        });
+
+        // Add hover effects for better UX
+        document.querySelectorAll('.choice-option').forEach(function(option) {
+            option.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.background = '#e9ecef';
+                }
+            });
+            
+            option.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.background = '#f8f9fa';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

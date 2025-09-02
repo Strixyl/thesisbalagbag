@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ form.title }} - Survey Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --error-color: #dc2626;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --border-radius: 8px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition: all 0.15s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1rem 0;
+        }
+
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            color: var(--gray-700);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .navbar-brand:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-link {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        /* Header */
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2.5rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .header-section .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .header-section h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .header-section p {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .bg-success {
+            background-color: rgba(220, 252, 231, 0.3);
+            color: #dcfce7;
+        }
+
+        .bg-warning {
+            background-color: rgba(254, 243, 199, 0.3);
+            color: #fef3c7;
+        }
+
+        /* Even Button Layout */
+        .actions {
+            margin-top: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--border-radius);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
+            min-height: 44px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Stats */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stats-card i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-card .text-primary { color: var(--primary-color); }
+        .stats-card .text-success { color: var(--success-color); }
+        .stats-card .text-info { color: #0ea5e9; }
+
+        .stats-card h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.25rem 0;
+            color: var(--gray-900);
+        }
+
+        .stats-card p {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            background: var(--gray-50);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header h5 i {
+            margin-right: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Sections */
+        .section-header {
+            margin: 1.5rem 0 1rem 0;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-left: 4px solid var(--primary-color);
+            border-radius: var(--border-radius);
+        }
+
+        .section-header:first-child {
+            margin-top: 0;
+        }
+
+        .section-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .section-description {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        /* Questions */
+        .question-preview {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--gray-100);
+            margin-left: 1rem;
+        }
+
+        .question-preview:last-child {
+            border-bottom: none;
+        }
+
+        .question-preview h6 {
+            font-weight: 500;
+            color: var(--gray-900);
+            margin-bottom: 0.75rem;
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .question-type {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .required-badge {
+            background: #fee2e2;
+            color: var(--error-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .question-description {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .question-choices {
+            margin-top: 0.75rem;
+        }
+
+        .question-choices ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 0 1rem;
+        }
+
+        .question-choices li {
+            padding: 0.125rem 0;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            position: relative;
+        }
+
+        .question-choices li::before {
+            content: "•";
+            color: var(--gray-400);
+            position: absolute;
+            left: -1rem;
+        }
+
+        /* Responses */
+        .response-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-100);
+            transition: background-color 0.2s ease;
+        }
+
+        .response-item:hover {
+            background-color: var(--gray-50);
+            border-radius: 6px;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .response-item:last-child {
+            border-bottom: none;
+        }
+
+        .response-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .response-email {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+
+        .response-time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .response-id {
+            font-size: 0.75rem;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-300);
+        }
+
+        .empty-state h5 {
+            margin: 0 0 0.5rem 0;
+            color: var(--gray-700);
+        }
+
+        .empty-state p {
+            margin: 0 0 1.5rem 0;
+        }
+
+        .btn-standard {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-standard:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            color: white;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: var(--success-color);
+            border-color: #bbf7d0;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: var(--warning-color);
+            border-color: #fde68a;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: var(--error-color);
+            border-color: #fecaca;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .actions {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header-section h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-section {
+                padding: 1.5rem 0;
+            }
+
+            .stats-card h3 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main {
+                padding: 0 0.5rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .actions {
+                grid-template-columns: 1fr;
+            }
+
+            .btn {
+                padding: 0.875rem 1rem;
+            }
+        }
+
+        /* Specific button width adjustments for better evenness */
+        @media (min-width: 769px) {
+            .actions {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'survey_list' %}">
+                <i class="fas fa-arrow-left me-2"></i>Back to Surveys
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'survey_edit' form.code %}">
+                    <i class="fas fa-edit me-1"></i>Edit Survey
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">{{ form.title }}</h1>
+                    <p class="mb-0 opacity-75">{{ form.description|default:"No description provided" }}</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'survey_edit' form.code %}" class="btn btn-uniform">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </a>
+                        <a href="{% url 'survey_preview' form.code %}" class="btn btn-uniform" target="_blank">
+                            <i class="fas fa-eye me-1"></i>Preview
+                        </a>
+                        <a href="{% url 'survey_sentiment' form.code %}" class="btn btn-uniform">
+                            <i class="fas fa-heart me-1"></i>Sentiment
+                        </a>
+                        <a href="{% url 'correlation_analysis' form.code %}" class="btn btn-uniform">
+                            <i class="fas fa-chart-bar me-1"></i>Correlation
+                        </a>
+                        <a href="{% url 'survey_response_view' form.code %}" class="btn btn-uniform">
+                            <i class="fas fa-list-alt me-1"></i>Responses
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-question-circle fa-3x text-primary mb-3"></i>
+                        <h3 class="mb-0">{{ stats.total_questions }}</h3>
+                        <p class="text-muted mb-0">Questions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-3x text-success mb-3"></i>
+                        <h3 class="mb-0">{{ stats.total_responses }}</h3>
+                        <p class="text-muted mb-0">Responses</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-calendar fa-3x text-info mb-3"></i>
+                        <h3 class="mb-0">{{ form.created_at|date:"M d" }}</h3>
+                        <p class="text-muted mb-0">Created</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Questions Column -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Questions ({{ form.get_total_questions }})
+                        </h5>
+                        <a href="{% url 'survey_edit' form.code %}" class="btn btn-sm btn-uniform">
+                            <i class="fas fa-plus me-1"></i>Add Question
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% with sections=form.get_sections_with_questions %}
+                            {% if sections %}
+                                {% for section in sections %}
+                                    {% if section.questions.exists %}
+                                        <!-- Section Header -->
+                                        <div class="section-header">
+                                            <h6 class="section-title">
+                                                <i class="fas fa-folder-open me-2"></i>{{ section.title }}
+                                            </h6>
+                                            {% if section.description %}
+                                                <p class="section-description">{{ section.description }}</p>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Questions in this section -->
+                                        {% for question in section.questions.all %}
+                                            <div class="question-preview">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-2">{{ forloop.parentloop.counter }}.{{ forloop.counter }}. {{ question.question }}</h6>
+                                                        <span class="badge bg-secondary">{{ question.question_type|title }}</span>
+                                                        {% if question.required %}
+                                                            <span class="badge bg-danger">Required</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                {% if question.description %}
+                                                    <p class="text-muted small mt-2 mb-2">{{ question.description }}</p>
+                                                {% endif %}
+                                                
+                                                <!-- Show choices for choice-based questions -->
+                                                {% if question.choices.exists %}
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">Options:</small>
+                                                        <ul class="list-unstyled ms-3 mb-0">
+                                                            {% for choice in question.choices.all %}
+                                                                <li><small>• {{ choice.choice }}</small></li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-question-circle"></i>
+                                    <h5>No Questions Yet</h5>
+                                    <p class="text-muted">Start building your survey by adding questions.</p>
+                                    <a href="{% url 'survey_edit' form.code %}" class="btn btn-uniform">
+                                        <i class="fas fa-plus me-2"></i>Add Your First Question
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Responses Column -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>Recent Responses
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_responses %}
+                            {% for response in recent_responses %}
+                                <div class="response-item">
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">
+                                            {% if response.responder_email %}
+                                                {{ response.responder_email }}
+                                            {% else %}
+                                                Anonymous
+                                            {% endif %}
+                                        </small>
+                                        <small class="text-muted">{{ response.created_at|timesince }} ago</small>
+                                    </div>
+                                    <small class="text-primary">Response #{{ response.code }}</small>
+                                </div>
+                            {% endfor %}
+                            {% if stats.total_responses > 5 %}
+                                <div class="text-center mt-3">
+                                    <a href="{% url 'survey_response_view' form.code %}" class="btn btn-sm btn-uniform">
+                                        View All {{ stats.total_responses }} Responses
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p class="text-muted mb-0">No responses yet</p>
+                                <small class="text-muted">Share your survey to start collecting responses</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add CSRF token to page for JavaScript requests
+        const csrfToken = '{{ csrf_token }}';
+    </script>
+</body>
+</html>

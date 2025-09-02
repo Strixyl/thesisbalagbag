@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome</title>
+<link rel="stylesheet" href="survey-styles.css">
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 30%;
+    margin: 15% auto;
+    padding: 30px 20px;
+    text-align: center;
+    background: #f4f6f8;
+    color: #333;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 30px;
+    color: #2c3e50;
+}
+
+.button {
+    display: inline-block;
+    padding: 14px 30px;
+    margin: 12px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    border: none;
+}
+
+.survey-button {
+    background-color: #3498db;
+    color: white;
+}
+
+.survey-button:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+}
+
+.admin-button {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.admin-button:hover {
+    background-color: #27ae60;
+    transform: scale(1.05);
+}
+    </style>
+</head>
+<body>
+    <h1>Welcome to CCS Survey</h1>
+    
+    <div>
+        <a href="{% url 'survey_classification_choice' %}" class="button survey-button">Take Survey</a>
+        <a href="{% url 'login_page' %}" class="button admin-button">Admin Login</a>
+    </div>
+</body>
+</html>

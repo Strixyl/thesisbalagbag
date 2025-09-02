@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Surveys - Survey Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .survey-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 4px solid #007bff;
+        }
+        .survey-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .survey-card.inactive {
+            border-left-color: #6c757d;
+            opacity: 0.8;
+        }
+        .stats-badge {
+            font-size: 0.8rem;
+        }
+        .search-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .btn-status {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .toggle-loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .status-badge {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'survey_list' %}">
+                <i class="fas fa-poll-h me-2"></i>Survey Manager
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'survey_create' %}">
+                    <i class="fas fa-plus me-1"></i>New Survey
+                </a>
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="search-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="mb-4">Surveys</h2>
+                    <form method="GET" class="row g-3" action="{% url 'survey_list' %}">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" name="search" 
+                                       placeholder="Search surveys..." value="{{ search_query }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-light">
+                                <i class="fas fa-search me-1"></i>Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ total_forms }}</h5>
+                        <p class="card-text">Total Surveys</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            {% if forms %}
+                {% for form in forms %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card survey-card h-100 {% if form.is_active is not None and not form.is_active %}inactive{% endif %}" id="survey-card-{{ form.code }}">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                {% if form.is_active is not None %}
+                                    <span class="badge status-badge {% if form.is_active %}bg-success{% else %}bg-secondary{% endif %} btn-status" id="status-badge-{{ form.code }}">
+                                        <span id="status-text-{{ form.code }}">{% if form.is_active %}Active{% else %}Inactive{% endif %}</span>
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-primary btn-status">Survey</span>
+                                {% endif %}
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                            data-bs-toggle="dropdown" data-bs-auto-close="true">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="{% url 'survey_detail' form.code %}">
+                                            <i class="fas fa-eye me-2"></i>View Details
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="{% url 'survey_edit' form.code %}">
+                                            <i class="fas fa-edit me-2"></i>Edit
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        {% if form.is_active is not None %}
+                                            <li><a class="dropdown-item" href="#" onclick="toggleStatus('{{ form.code }}')">
+                                                <i class="fas fa-power-off me-2"></i>
+                                                <span id="toggle-text-{{ form.code }}">
+                                                    {% if form.is_active %}Deactivate{% else %}Activate{% endif %}
+                                                </span>
+                                            </a></li>
+                                        {% endif %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#" 
+                                               onclick="deleteSurvey('{{ form.code }}', '{{ form.title }}')">
+                                            <i class="fas fa-trash me-2"></i>Delete
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ form.title }}</h5>
+                                <p class="card-text text-muted">{{ form.description|truncatechars:100 }}</p>
+                                {% if form.classification %}
+                                    <div class="mt-2">
+                                        <span class="badge bg-info">{{ form.classification }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Created: {{ form.created_at|date:"M d, Y" }}
+                                </small>
+                                <div class="btn-group w-100 mt-2" role="group">
+                                    <a href="{% url 'survey_detail' form.code %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </a>
+                                    <a href="{% url 'survey_edit' form.code %}" class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                    <a href="#" class="btn btn-outline-info btn-sm" onclick="shareLink('{{ form.code }}')">
+                                        <i class="fas fa-share me-1"></i>Share
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-poll-h fa-3x text-muted mb-3"></i>
+                            <h4>No Surveys Found</h4>
+                            <p class="text-muted">You haven't created any surveys yet or no surveys match your search criteria.</p>
+                            <a href="{% url 'survey_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Create Your First Survey
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if forms.has_other_pages %}
+            <nav aria-label="Survey pagination">
+                <ul class="pagination justify-content-center">
+                    {% if forms.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ forms.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in forms.paginator.page_range %}
+                        {% if forms.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > forms.number|add:'-3' and num < forms.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if forms.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ forms.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ forms.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the survey "<span id="surveyTitle"></span>"?</p>
+                    <p class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i>This action cannot be undone!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="POST" style="display: inline;">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        <button type="submit" class="btn btn-danger">Delete Survey</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="statusToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                <strong class="me-auto">Survey Status</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                <!-- Message will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function getCSRFToken() {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfToken) {
+                return csrfToken.value;
+            }
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('statusToast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastHeader = toast.querySelector('.toast-header');
+            
+            toastMessage.textContent = message;
+            
+            const icon = toastHeader.querySelector('i');
+            if (isSuccess) {
+                icon.className = 'fas fa-check-circle text-success me-2';
+            } else {
+                icon.className = 'fas fa-exclamation-circle text-danger me-2';
+            }
+            
+            const toastBootstrap = new bootstrap.Toast(toast);
+            toastBootstrap.show();
+        }
+
+        function toggleStatus(formCode) {
+            const card = document.getElementById(`survey-card-${formCode}`);
+            const statusBadge = document.getElementById(`status-badge-${formCode}`);
+            const statusText = document.getElementById(`status-text-${formCode}`);
+            const toggleText = document.getElementById(`toggle-text-${formCode}`);
+            
+            if (card.classList.contains('toggle-loading')) {
+                return;
+            }
+            
+            card.classList.add('toggle-loading');
+            statusText.textContent = 'Updating...';
+
+            fetch(`/admin-dashboard/${formCode}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    if (data.is_active) {
+                        statusBadge.className = 'badge status-badge bg-success btn-status';
+                        statusText.textContent = 'Active';
+                        toggleText.textContent = 'Deactivate';
+                        card.classList.remove('inactive');
+                        card.style.borderLeftColor = '#007bff';
+                    } else {
+                        statusBadge.className = 'badge status-badge bg-secondary btn-status';
+                        statusText.textContent = 'Inactive';
+                        toggleText.textContent = 'Activate';
+                        card.classList.add('inactive');
+                        card.style.borderLeftColor = '#6c757d';
+                    }
+                    
+                    showToast(data.message, true);
+                } else {
+                    statusText.textContent = statusBadge.classList.contains('bg-success') ? 'Active' : 'Inactive';
+                    showToast('Error: ' + data.message, false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusText.textContent = statusBadge.classList.contains('bg-success') ? 'Active' : 'Inactive';
+                showToast('An error occurred while updating the survey status.', false);
+            })
+            .finally(() => {
+                card.classList.remove('toggle-loading');
+            });
+        }
+
+        function deleteSurvey(formCode, formTitle) {
+            document.getElementById('surveyTitle').textContent = formTitle;
+            document.getElementById('deleteForm').action = `/admin-dashboard/${formCode}/delete/`;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        function shareLink(formCode) {
+            const url = `${window.location.origin}/survey/${formCode}/`;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('Survey link copied to clipboard!', true);
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('Survey link copied to clipboard!', true);
+            });
+        }
+    </script>
+</body>
+</html>

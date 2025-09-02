@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ form.title }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+   <style>
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+.form-header {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.form-title {
+    color: #2c3e50;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.2;
+}
+
+.form-description {
+    color: #7f8c8d;
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+
+.classification-badge {
+    display: inline-block;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 25px;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.form-body {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    min-height: 400px;
+}
+
+.preview-notice {
+    background: linear-gradient(45deg, #f39c12, #e67e22);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.page {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.page.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.progress-container {
+    margin-bottom: 25px;
+}
+
+.progress {
+    height: 6px;
+    border-radius: 10px;
+    background: #ecf0f1;
+}
+
+.progress-bar {
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    text-align: center;
+    margin-top: 8px;
+    color: #7f8c8d;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.section {
+    margin-bottom: 25px;
+}
+
+.section-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.section-title {
+    color: #2c3e50;
+    font-size: 1.7rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.section-description {
+    color: #7f8c8d;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.question {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.question:hover {
+    border-color: #1a73e8;
+}
+
+.question-text {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #202124;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.required {
+    color: #d93025;
+}
+
+.form-control {
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    line-height: 1.4;
+    background: white;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    border-color: #1a73e8;
+    outline: none;
+    box-shadow: none;
+}
+
+.form-control:hover {
+    border-color: #1a73e8;
+}
+
+/* Long text area - made bigger */
+textarea.form-control {
+    min-height: 150px;
+    resize: vertical;
+}
+
+/* Character counter */
+.char-counter {
+    font-size: 12px;
+    color: #666;
+    text-align: right;
+    margin-top: 4px;
+}
+
+/* Google Forms style radio buttons and checkboxes - Fixed positioning */
+.form-check {
+    margin-bottom: 4px;
+    padding: 12px;
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    border-radius: 4px;
+    min-height: 44px;
+    box-sizing: border-box;
+    width: 100%;
+    position: relative;
+}
+
+.form-check:hover {
+    background-color: #f1f3f4;
+}
+
+.form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-right: 14px;
+    margin-top: 1px;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.form-check-input[type="radio"] {
+    appearance: none;
+    border: 2px solid #5f6368;
+    border-radius: 50%;
+    background: white;
+    position: relative;
+}
+
+.form-check-input[type="radio"]:checked {
+    border-color: #1a73e8;
+}
+
+.form-check-input[type="radio"]:checked::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1a73e8;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.form-check-input[type="checkbox"] {
+    appearance: none;
+    border: 2px solid #5f6368;
+    border-radius: 2px;
+    background: white;
+    position: relative;
+}
+
+.form-check-input[type="checkbox"]:checked {
+    background: #1a73e8;
+    border-color: #1a73e8;
+}
+
+.form-check-input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.form-check-label {
+    font-size: 14px;
+    color: #202124;
+    cursor: pointer;
+    line-height: 1.4;
+    margin: 0;
+    flex: 1;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: calc(100% - 40px);
+}
+
+.email-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.email-section .question-text {
+    color: #202124;
+    margin-bottom: 12px;
+}
+
+/* Simple Google Forms style navigation */
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.nav-btn {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: #1557b0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.nav-btn:disabled {
+    background: #dadce0;
+    color: #5f6368;
+    cursor: default;
+}
+
+#stepIndicator {
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.btn-submit {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 20px;
+}
+
+.btn-submit:hover {
+    background: #1557b0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.choices-container {
+    max-height: none;
+    overflow: visible;
+    border-radius: 8px;
+    padding: 8px;
+    background: white;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.other-input {
+    margin-top: 8px;
+    margin-left: 40px;
+    margin-right: 8px;
+    display: none;
+}
+
+.other-input.show {
+    display: block;
+}
+
+.data-privacy-section {
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f8f9fa;
+    margin-bottom: 20px;
+}
+
+.data-privacy-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    color: #202124;
+}
+
+.data-privacy-section .privacy-content {
+    background: white;
+    padding: 16px;
+    border-radius: 4px;
+    border-left: 4px solid #1a73e8;
+    margin-bottom: 16px;
+}
+
+.data-privacy-section .privacy-content p {
+    margin: 0;
+    line-height: 1.4;
+    color: #5f6368;
+    font-size: 14px;
+}
+
+.form-text {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #5f6368;
+}
+
+/* Google Forms style linear scale - Improved layout */
+.linear-scale-container {
+    margin: 20px 0;
+    border-radius: 8px;
+    padding: 24px;
+    background: white;
+}
+
+.scale-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.scale-label-left {
+    font-size: 14px;
+    color: #5f6368;
+    text-align: right;
+    min-width: 100px;
+    flex-shrink: 0;
+    font-weight: 500;
+}
+
+.scale-options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-shrink: 0;
+}
+
+.scale-label-right {
+    font-size: 14px;
+    color: #5f6368;
+    text-align: left;
+    min-width: 100px;
+    flex-shrink: 0;
+    font-weight: 500;
+}
+
+.scale-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.scale-option input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #5f6368;
+    border-radius: 50%;
+    margin-bottom: 4px;
+    cursor: pointer;
+    position: relative;
+    background: white;
+}
+
+.scale-option input[type="radio"]:checked {
+    border-color: #1a73e8;
+}
+
+.scale-option input[type="radio"]:checked::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1a73e8;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.scale-option label {
+    font-size: 14px;
+    color: #5f6368;
+    cursor: pointer;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Dropdown improvements */
+select.form-control {
+    cursor: pointer;
+    background: white;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%235f6368"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .scale-wrapper {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .scale-label-left,
+    .scale-label-right {
+        min-width: auto;
+        text-align: center;
+    }
+    
+    .scale-options {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .form-header {
+        padding: 20px 15px;
+        margin-bottom: 10px;
+    }
+    
+    .form-body {
+        padding: 20px 15px;
+    }
+    
+    .question {
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .navigation-buttons {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #stepIndicator {
+        order: -1;
+        text-align: center;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1 class="form-title">{{ form.title }}</h1>
+            {% if form.description %}
+                <p class="form-description">{{ form.description }}</p>
+            {% endif %}
+            <div class="classification-badge">{{ form.get_classification_display }}</div>
+        </div>
+        
+        <!-- Form Body -->
+        <div class="form-body">
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar" style="width: {% widthratio 1 total_sections|add:1 100 %}%;"></div>
+                </div>
+                <div class="progress-text">
+                    Page <span id="currentPage">1</span> of <span id="totalPages">{{ total_sections|add:1 }}</span>
+                </div>
+            </div>
+
+            <form method="post" id="surveyForm" class="form-body" action="{% url 'survey_submit' form.code %}" 
+                  {% if is_preview %}onsubmit="return false;"{% endif %}>
+                {% csrf_token %}
+                
+                <!-- Preview Notice -->
+                {% if is_preview %}
+                <div class="preview-notice">
+                    📋 This is a preview of your survey. Respondents will see this exact layout.
+                </div>
+                {% endif %}
+                
+                <!-- Email Collection and Data Privacy Page -->
+                <div class="page active" data-page="0">
+                    <!-- Data Privacy Section -->
+                    {% if form.data_privacy %}
+                    <div class="data-privacy-section">
+                        <h3 style="color: #2c3e50;">
+                            <i class="fas fa-shield-alt"></i> Data Privacy Information
+                        </h3>
+                        <div class="privacy-content">
+                            <p>{{ form.data_privacy|linebreaks }}</p>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="privacy_consent" name="privacy_consent" 
+                                {% if not is_preview %}required{% endif %}
+                                {% if is_preview %}disabled{% endif %}
+                                {% if not is_preview %}onchange="toggleNextButton()"{% endif %}>
+                            <label class="form-check-label" for="privacy_consent" style="color: #495057;">
+                                I have read and agree to the data privacy policy <span class="required">*</span>
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Email Collection Section -->
+                    {% if form.require_email %}
+                    <div class="email-section">
+                        <label for="responder_email" class="question-text">
+                            Email Address <span class="required">*</span>
+                        </label>
+                        <input type="email" 
+                               id="responder_email" 
+                               name="responder_email" 
+                               class="form-control" 
+                               maxlength="200"
+                               placeholder="your.email@example.com"
+                               {% if not is_preview %}required{% endif %}
+                               {% if is_preview %}disabled{% endif %}
+                               oninput="updateCharCounter(this, 200)">
+                    <div class="char-counter" id="counter_responder_email">0 / 200</div>
+                    </div>
+                    {% else %}
+                    <div class="email-section">
+                        <label for="responder_email" class="question-text">
+                            Email Address (Optional)
+                        </label>
+                        <input type="email" 
+                               id="responder_email" 
+                               name="responder_email" 
+                               class="form-control" 
+                               placeholder="your.email@example.com"
+                               {% if is_preview %}disabled{% endif %}>
+                        <small class="form-text text-muted">
+                            Providing your email is optional but may be helpful for follow-up communications.
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sections -->
+                {% for section in sections %}
+                <div class="page" data-page="{{ forloop.counter }}">
+                    <div class="section">
+                        {% if section.title %}
+                        <div class="section-header">
+                            <h2 class="section-title">{{ section.title }}</h2>
+                            {% if section.description %}
+                                <p class="section-description">{{ section.description }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Questions in Section -->
+                        {% for question in section.ordered_questions|default:section.questions.all %}
+                        <div class="question">
+                            <div class="question-text">
+                                {{ question.question }}
+                                {% if question.required %}
+                                    <span class="required">*</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if question.question_type == 'short_text' %}
+                                <input type="text" 
+                                       name="question_{{ question.id }}" 
+                                       class="form-control"
+                                       maxlength="200"
+                                       {% if question.required %}required{% endif %}
+                                       {% if is_preview %}disabled{% endif %}
+                                       oninput="updateCharCounter(this, 200)">
+                            <div class="char-counter" id="counter_question_{{ question.id }}">0 / 200</div>
+                            
+                            {% elif question.question_type == 'long_text' %}
+                                <textarea name="question_{{ question.id }}" 
+                                         class="form-control"
+                                         rows="3"
+                                         maxlength="1000"
+                                         {% if question.required %}required{% endif %}
+                                         {% if is_preview %}disabled{% endif %}
+                                         oninput="updateCharCounter(this, 1000)"></textarea>
+                            <div class="char-counter" id="counter_question_{{ question.id }}">0 / 1000</div>
+
+                            {% elif question.question_type == 'multiple_choice' %}
+                                <div class="choices-container">
+                                    {% for choice in question.choices.all %}
+                                    <div class="form-check">
+                                        <input type="radio" 
+                                               id="q{{ question.id }}_{{ forloop.counter }}"
+                                               name="question_{{ question.id }}" 
+                                               value="{{ choice.choice }}"
+                                               class="form-check-input"
+                                               {% if question.required and forloop.first %}required{% endif %}
+                                               {% if is_preview %}disabled{% endif %}>
+                                        <label for="q{{ question.id }}_{{ forloop.counter }}" class="form-check-label">
+                                            {{ choice.choice }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                    
+                                    {% if question.has_other %}
+                                    <div class="form-check">
+                                        <input type="radio" 
+                                               id="q{{ question.id }}_other"
+                                               name="question_{{ question.id }}" 
+                                               value="Other"
+                                               class="form-check-input other-option"
+                                               data-question="{{ question.id }}"
+                                               {% if question.required and not question.choices.all %}required{% endif %}
+                                               {% if is_preview %}disabled{% endif %}>
+                                        <label for="q{{ question.id }}_other" class="form-check-label">Other</label>
+                                    </div>
+                                    <div class="other-input" id="other_{{ question.id }}">
+                                        <input type="text" 
+                                               name="question_{{ question.id }}_other" 
+                                               class="form-control"
+                                               maxlength="200"
+                                               placeholder="Please specify..."
+                                               {% if is_preview %}disabled{% endif %}
+                                                oninput="updateCharCounter(this, 200)">
+                                        <div class="char-counter" id="counter_other_{{ question.id }}">0 / 200</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            
+                            {% elif question.question_type == 'checkbox' %}
+                                <div class="choices-container">
+                                    {% for choice in question.choices.all %}
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               id="q{{ question.id }}_{{ forloop.counter }}"
+                                               name="question_{{ question.id }}" 
+                                               value="{{ choice.choice }}"
+                                               class="form-check-input"
+                                               {% if is_preview %}disabled{% endif %}>
+                                        <label for="q{{ question.id }}_{{ forloop.counter }}" class="form-check-label">
+                                            {{ choice.choice }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                    
+                                    {% if question.has_other %}
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               id="q{{ question.id }}_other"
+                                               name="question_{{ question.id }}" 
+                                               value="Other"
+                                               class="form-check-input other-option"
+                                               data-question="{{ question.id }}"
+                                               {% if is_preview %}disabled{% endif %}>
+                                        <label for="q{{ question.id }}_other" class="form-check-label">Other</label>
+                                    </div>
+                                    <div class="other-input" id="other_{{ question.id }}">
+                                        <input type="text" 
+                                               name="question_{{ question.id }}_other" 
+                                               class="form-control"
+                                               maxlength="200"
+                                               placeholder="Please specify..."
+                                               {% if is_preview %}disabled{% endif %}
+                                                oninput="updateCharCounter(this, 200)">
+                                    <div class="char-counter" id="counter_other_{{ question.id }}">0 / 200</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            
+                            {% elif question.question_type == 'dropdown' %}
+                                <select name="question_{{ question.id }}" 
+                                        class="form-control"
+                                        {% if question.required %}required{% endif %}
+                                        {% if is_preview %}disabled{% endif %}
+                                        {% if question.has_other %}onchange="handleDropdownOther(this, {{ question.id }})"{% endif %}>
+                                    <option value="">Choose an option...</option>
+                                    {% for choice in question.choices.all %}
+                                    <option value="{{ choice.choice }}">{{ choice.choice }}</option>
+                                    {% endfor %}
+                                    {% if question.has_other %}
+                                    <option value="Other">Other</option>
+                                    {% endif %}
+                                </select>
+                                
+                                {% if question.has_other %}
+                                <div class="other-input" id="other_{{ question.id }}">
+                                    <input type="text" 
+                                           name="question_{{ question.id }}_other" 
+                                           class="form-control"
+                                           maxlength="200"
+                                           placeholder="Please specify..."
+                                           {% if is_preview %}disabled{% endif %}
+                                           oninput="updateCharCounter(this, 200)">
+                                    <div class="char-counter" id="counter_other_{{ question.id }}">0 / 200</div>
+                                </div>
+                                {% endif %}
+                            
+                            {% elif question.question_type == 'linear_scale' %}
+                                    <div class="linear-scale-container">
+                                        <div class="scale-wrapper">
+                                            <div class="scale-label-left">
+                                                {{ question.scale_min_label|default:"" }}
+                                            </div>
+                                            
+                                            <div class="scale-options">
+                                                {% with min_val=question.scale_min max_val=question.scale_max %}
+                                                    {% for i in "0123456789"|make_list %}
+                                                        {% if forloop.counter0|add:min_val <= max_val %}
+                                                            <div class="scale-option">
+                                                                <input type="radio" 
+                                                                    name="question_{{ question.id }}" 
+                                                                    value="{{ forloop.counter0|add:min_val }}"
+                                                                    id="q{{ question.id }}_scale_{{ forloop.counter0|add:min_val }}"
+                                                                    {% if question.required %}required{% endif %}
+                                                                    {% if is_preview %}disabled{% endif %}>
+                                                                <label for="q{{ question.id }}_scale_{{ forloop.counter0|add:min_val }}">
+                                                                    {{ forloop.counter0|add:min_val }}
+                                                                </label>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endwith %}
+                                            </div>
+                                            
+                                            <div class="scale-label-right">
+                                                {{ question.scale_max_label|default:"" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Navigation Buttons -->
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn" id="prevBtn" onclick="changeStep(-1)">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    
+                    <div>
+                        <span id="stepIndicator">Step 1 of {{ total_sections|add:1 }}</span>
+                    </div>
+                    
+                    <button type="button" class="nav-btn" id="nextBtn" onclick="changeStep(1)">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                    {% if not is_preview %}
+                    <button type="submit" class="btn-submit" id="submitBtn" style="display:none;">
+                        <i class="fas fa-paper-plane"></i> Submit Response
+                    </button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+
+        let currentStep = 0;
+        const totalSteps = {{ total_sections|add:1 }};
+
+        function showStep(step) {
+             // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Show current page
+            document.querySelector(`[data-page="${step}"]`).classList.add('active');
+
+            // Update progress bar
+            const progress = ((step + 1) / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Update page indicators
+            document.getElementById('currentPage').textContent = step + 1;
+            document.getElementById('totalPages').textContent = totalSteps;
+            document.getElementById('stepIndicator').textContent = `Step ${step + 1} of ${totalSteps}`;
+
+            // Hide Previous button on first page, show otherwise
+            const prevBtn = document.getElementById('prevBtn');
+            prevBtn.style.display = step === 0 ? 'none' : 'flex';
+
+            // Hide Next button on last page
+            document.getElementById('nextBtn').style.display = step === totalSteps - 1 ? 'none' : 'flex';
+
+            {% if not is_preview %}
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.style.display = step === totalSteps - 1 ? 'inline-block' : 'none';
+            }
+            {% endif %}
+
+            toggleNextButton();
+        }
+        
+        function toggleNextButton() {
+            console.log('toggleNextButton called, currentStep:', currentStep);
+            const nextBtn = document.getElementById('nextBtn');
+            {% if is_preview %}
+            nextBtn.disabled = false;
+            nextBtn.style.opacity = '1';
+            nextBtn.style.cursor = 'pointer';
+            return;
+            {% endif %}
+
+            if (currentStep === 0) {
+                const privacyConsent = document.getElementById('privacy_consent');
+                if (privacyConsent) {
+                    nextBtn.disabled = !privacyConsent.checked;
+                    if (privacyConsent.checked) {
+                        nextBtn.style.opacity = '1';
+                        nextBtn.style.cursor = 'pointer';
+                    } else {
+                        nextBtn.style.opacity = '0.5';
+                        nextBtn.style.cursor = 'not-allowed';
+                    }
+                } else {
+                    // If privacyConsent is not present, always enable Next
+                    nextBtn.disabled = false;
+                    nextBtn.style.opacity = '1';
+                    nextBtn.style.cursor = 'pointer';
+                }
+            } else {
+                nextBtn.disabled = false;
+                nextBtn.style.opacity = '1';
+                nextBtn.style.cursor = 'pointer';
+            }
+        }
+
+        function changeStep(direction) {
+            console.log('changeStep called, direction:', direction, 'currentStep:', currentStep);
+            const newStep = currentStep + direction;
+            if (direction > 0 && !validateCurrentStep()) {
+                console.log('Validation failed');
+                return;
+            }
+            if (newStep >= 0 && newStep < totalSteps) {
+                currentStep = newStep;
+                showStep(currentStep);
+                console.log('Step changed to:', currentStep);
+            }
+        }
+
+        function validateCurrentStep() {
+            const currentPage = document.querySelector(`[data-page="${currentStep}"]`);
+            let isValid = true;
+            let errorMessage = '';
+            
+            // Skip validation in preview mode
+            {% if is_preview %}
+            return true;
+            {% endif %}
+            
+            // Special validation for first page (email and privacy)
+            if (currentStep === 0) {
+                // Check privacy consent first
+                const privacyConsent = currentPage.querySelector('#privacy_consent');
+                if (privacyConsent && !privacyConsent.checked) {
+                    isValid = false;
+                    errorMessage = 'Please read and agree to the data privacy policy to continue.';
+                    privacyConsent.focus();
+                    return showValidationError(errorMessage);
+                }
+                
+                // Check required email
+                const emailField = currentPage.querySelector('#responder_email');
+                if (emailField && emailField.hasAttribute('required') && !emailField.value.trim()) {
+                    isValid = false;
+                    errorMessage = 'Please enter your email address to continue.';
+                    emailField.style.borderColor = '#dc3545';
+                    emailField.focus();
+                    return showValidationError(errorMessage);
+                } else if (emailField && emailField.value.length > 200) {
+                    isValid = false;
+                    errorMessage = 'Email address must not exceed 200 characters.';
+                    emailField.style.borderColor = '#dc3545';
+                    emailField.focus();
+                    return showValidationError(errorMessage);
+                }else if (emailField) {
+                    emailField.style.borderColor = '#e9ecef';
+                }
+            } else {
+                // Validation for other pages
+                const requiredFields = currentPage.querySelectorAll('[required]');
+                
+                requiredFields.forEach(field => {
+                    if (field.type === 'radio') {
+                        const radioGroup = currentPage.querySelectorAll(`[name="${field.name}"]`);
+                        const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                        if (!isChecked) {
+                            isValid = false;
+                            errorMessage = 'Please answer all required questions before proceeding.';
+                        }
+                    } else if (!field.value.trim()) {
+                        field.style.borderColor = '#dc3545';
+                        isValid = false;
+                        errorMessage = 'Please fill in all required fields before proceeding.';
+                        field.focus();
+                    } else {
+                        field.style.borderColor = '#e9ecef';
+                    }
+                });
+            }
+            
+            if (!isValid && errorMessage) {
+                showValidationError(errorMessage);
+            }
+            
+            return isValid;
+        }
+        
+        function showValidationError(message) {
+            alert(message);
+            return false;
+        }
+
+        // Handle "Other" option for radio buttons and checkboxes
+        document.querySelectorAll('.other-option').forEach(input => {
+            input.addEventListener('change', function() {
+                const questionId = this.dataset.question;
+                const otherInput = document.getElementById(`other_${questionId}`);
+                
+                if (this.type === 'radio' && this.checked) {
+                    otherInput.classList.add('show');
+                    otherInput.querySelector('input').focus();
+                    
+                    // Make the other text input required if this radio is selected
+                    const textInput = otherInput.querySelector('input');
+                    textInput.setAttribute('required', 'required');
+                } else if (this.type === 'checkbox') {
+                    if (this.checked) {
+                        otherInput.classList.add('show');
+                        otherInput.querySelector('input').focus();
+                    } else {
+                        otherInput.classList.remove('show');
+                        otherInput.querySelector('input').value = '';
+                        otherInput.querySelector('input').removeAttribute('required');
+                    }
+                }
+            });
+        });
+
+        // Handle "Other" option for dropdowns
+        function handleDropdownOther(select, questionId) {
+            const otherInput = document.getElementById(`other_${questionId}`);
+            
+            if (select.value === 'Other') {
+                otherInput.classList.add('show');
+                otherInput.querySelector('input').focus();
+                
+                // Make the other text input required if "Other" is selected
+                const textInput = otherInput.querySelector('input');
+                textInput.setAttribute('required', 'required');
+            } else {
+                otherInput.classList.remove('show');
+                otherInput.querySelector('input').value = '';
+                otherInput.querySelector('input').removeAttribute('required');
+            }
+        }
+
+        // Handle radio button changes for "Other" cleanup
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.name.startsWith('question_')) {
+                    const questionId = this.name.replace('question_', '');
+                    const otherInput = document.getElementById(`other_${questionId}`);
+                    
+                    if (otherInput && !this.classList.contains('other-option')) {
+                        otherInput.classList.remove('show');
+                        const textInput = otherInput.querySelector('input');
+                        textInput.value = '';
+                        textInput.removeAttribute('required');
+                    }
+                }
+            });
+        });
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            showStep(0);
+            toggleNextButton();
+
+            document.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(input => {
+                const max = input.getAttribute('maxlength');
+                updateCharCounter(input, max);
+                input.addEventListener('input', function() {
+                    updateCharCounter(this, max);
+                });
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft' && currentStep > 0) {
+                    changeStep(-1);
+                } else if (e.key === 'ArrowRight' && currentStep < totalSteps - 1) {
+                    changeStep(1);
+                }
+            });
+
+            // Privacy consent change event
+            const privacyConsent = document.getElementById('privacy_consent');
+            if (privacyConsent) {
+                privacyConsent.addEventListener('change', toggleNextButton);
+            }
+        });
+
+        // Form validation and submission
+        {% if not is_preview %}
+        document.getElementById('surveyForm').addEventListener('submit', function(e) {
+            const requiredFields = document.querySelectorAll('[required]');
+            let isValid = true;
+            let errorMessages = [];
+            
+            requiredFields.forEach(field => {
+                if (field.type === 'radio') {
+                    const radioGroup = document.querySelectorAll(`[name="${field.name}"]`);
+                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                    if (!isChecked) {
+                        isValid = false;
+                        errorMessages.push(`Please answer the required question.`);
+                    }
+                } else if (field.type === 'checkbox' && field.name === 'privacy_consent' && !field.checked) {
+                    isValid = false;
+                    errorMessages.push('Please agree to the data privacy policy.');
+                } else if (!field.value.trim()) {
+                    field.style.borderColor = '#dc3545';
+                    isValid = false;
+                    errorMessages.push(`Please fill in all required fields.`);
+                } else {
+                    field.style.borderColor = '#e9ecef';
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert([...new Set(errorMessages)].join('\n'));
+            }
+        });
+        
+        // Remove error styling on input
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('input', function() {
+                this.style.borderColor = '#e9ecef';
+            });
+        });
+        {% else %}
+        document.getElementById('surveyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('This is a preview mode. Form submission is disabled.');
+        });
+        {% endif %}
+
+        function updateCharCounter(input, max) {
+        let id;
+        if (input.name === 'responder_email') {
+            id = 'counter_responder_email';
+        } else if (input.name.startsWith('question_') && input.name.endsWith('_other')) {
+            id = 'counter_other_' + input.name.split('_')[1];
+        } else {
+            id = 'counter_' + input.name;
+        }
+        const counter = document.getElementById(id);
+        if (counter) {
+            counter.textContent = `${input.value.length} / ${max}`;
+        }
+    }
+
+    </script>
+</body>
+</html>

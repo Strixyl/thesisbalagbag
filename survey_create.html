@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Survey</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .form-header h2 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .form-header p {
+            color: #666;
+        }
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        .btn-create {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h2>Create New Survey</h2>
+                        </div>
+
+                        <!-- Messages -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="POST" id="createSurveyForm">
+                            {% csrf_token %}
+                            
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       placeholder="Survey Title" required>
+                                <label for="title">
+                                    <i class="fas fa-heading me-2"></i>Survey Title *
+                                </label>
+                            </div>
+
+                            <div class="form-floating">
+                                <textarea class="form-control" id="description" name="description" 
+                                          placeholder="Survey Description" style="height: 120px"></textarea>
+                                <label for="description">
+                                    <i class="fas fa-align-left me-2"></i>Survey Description
+                                </label>
+                            </div>
+
+                            <!-- Hidden checkbox that's always checked -->
+                            <input type="hidden" name="is_active" value="on">
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-create">
+                                    Create Survey
+                                </button>
+                                <a href="{% url 'survey_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Surveys
+                                </a>
+                            </div>
+                        </form>
+
+                        <div class="mt-4 pt-4 border-top">
+                            <div class="row text-center">
+                                <div class="col-12">
+                                    <small class="text-muted">
+                                        <i class="fas fa-lightbulb me-1"></i>
+                         Create and Edit surveys.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form validation
+        document.getElementById('createSurveyForm').addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+            
+            if (!title) {
+                e.preventDefault();
+                alert('Please enter a survey title.');
+                document.getElementById('title').focus();
+                return false;
+            }
+
+            if (title.length < 3) {
+                e.preventDefault();
+                alert('Survey title must be at least 3 characters long.');
+                document.getElementById('title').focus();
+                return false;
+            }
+
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
+            submitBtn.disabled = true;
+        });
+
+        // Auto-focus on title field
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('title').focus();
+        });
+    </script>
+</body>
+</html>
